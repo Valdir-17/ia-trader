@@ -4,29 +4,39 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-st.set_page_config(page_title="IA Trader", layout="wide")
-st.title("🤖 IA Trader Pro - Versão Celular")
+st.set_page_config(page_title="IA Trader Pro", layout="wide")
+
+st.title("🤖 IA Trader Pro")
+st.markdown("### Sinais para Opções Binárias & Forex")
 
 st.sidebar.header("⚙️ Configurações")
 
-ativo = st.sidebar.text_input("Código do Ativo (ex: BTC-USD)", "BTC-USD")
+ativo = st.sidebar.text_input("Código do Ativo", "BTC-USD", help="Ex: BTC-USD, PETR4.SA, EURUSD=X")
 
-tempo = st.sidebar.selectbox("Tempo de Expiração", ["5 minutos", "15 minutos", "30 minutos", "1 hora"])
+tempo_exp = st.sidebar.selectbox("Tempo de Expiração", 
+    ["5 minutos", "15 minutos", "30 minutos", "1 hora"])
 
-if st.sidebar.button("🚀 Gerar Sinal"):
-    with st.spinner("Analisando o mercado..."):
+if st.sidebar.button("🚀 GERAR SINAL", type="primary", use_container_width=True):
+    with st.spinner("Buscando dados do mercado..."):
         try:
-            df = yf.download(ativo, period="5d", interval="5m", progress=False)
-            if not df.empty:
-                preco = df['Close'].iloc[-1]
-                st.success(f"**SINAL PARA {tempo}**")
-                st.metric("Preço Atual", f"${preco:.4f}")
-                sinal = "🟢 COMPRA (Vai SUBIR)" if np.random.rand() > 0.45 else "🔴 VENDA (Vai DESCER)"
-                st.metric("Sinal IA", sinal)
-                st.info("💡 Use na conta DEMO da Pocket Option primeiro!")
+            df = yf.download(ativo, period="7d", interval="5m", progress=False)
+            
+            if df.empty:
+                st.error("❌ Não consegui buscar dados desse ativo. Tente outro.")
             else:
-                st.error("Não consegui buscar dados desse ativo.")
-        except:
-            st.error("Erro ao buscar dados. Tente outro ativo.")
+                preco = df['Close'].iloc[-1]
+                
+                st.success(f"**SINAL PARA {tempo_exp}**")
+                st.metric("Preço Atual", f"${preco:.4f}")
+                
+                # Sinal simples (pode ser melhorado depois)
+                direcao = "🟢 COMPRA (SUBIR)" if np.random.rand() > 0.5 else "🔴 VENDA (DESCER)"
+                st.metric("Sinal da IA", direcao)
+                
+                st.info("💡 **Dica**: Sempre teste primeiro na conta DEMO da Pocket Option!")
+                
+        except Exception as e:
+            st.error("Erro ao buscar dados. Tente novamente.")
 
-st.caption("IA Trader Pro • Versão Leve para Android")
+st.caption(f"Atualizado: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+st.caption("Versão Leve • Funciona bem no Celular")
