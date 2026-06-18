@@ -6,4 +6,3 @@ plotly
 pandas-ta
 scikit-learn
 reportlab
-Adicionando requirements.txt
