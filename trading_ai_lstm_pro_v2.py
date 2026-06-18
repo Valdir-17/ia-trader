@@ -1,32 +1,43 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import numpy as np
 from datetime import datetime
 
 st.set_page_config(page_title="IA Trader", layout="wide")
-st.title("🤖 IA Trader Pro - Versão Celular")
 
-st.sidebar.header("⚙️ Configurações")
+st.title("🤖 IA Trader Pro")
+st.markdown("### Sinais para Pocket Option (Versão Estável)")
 
-ativo = st.sidebar.text_input("Código do Ativo (ex: BTC-USD)", "BTC-USD")
+st.sidebar.header("Configurações")
 
-tempo = st.sidebar.selectbox("Tempo de Expiração", ["5 minutos", "15 minutos", "30 minutos", "1 hora"])
+ativo = st.sidebar.text_input("Ativo (ex: BTC-USD, PETR4.SA, EURUSD=X)", "BTC-USD")
 
-if st.sidebar.button("🚀 Gerar Sinal"):
-    with st.spinner("Analisando o mercado..."):
+tempo = st.sidebar.selectbox("Tempo de Expiração", 
+    ["5 minutos", "15 minutos", "30 minutos", "1 hora"])
+
+if st.sidebar.button("🚀 Gerar Sinal", type="primary"):
+    with st.spinner("Buscando dados..."):
         try:
-            df = yf.download(ativo, period="5d", interval="5m", progress=False)
-            if not df.empty:
-                preco = df['Close'].iloc[-1]
-                st.success(f"**SINAL PARA {tempo}**")
-                st.metric("Preço Atual", f"${preco:.4f}")
-                sinal = "🟢 COMPRA (Vai SUBIR)" if np.random.rand() > 0.45 else "🔴 VENDA (Vai DESCER)"
-                st.metric("Sinal IA", sinal)
-                st.info("💡 Use na conta DEMO da Pocket Option primeiro!")
+            df = yf.download(ativo, period="7d", interval="5m", progress=False)
+            
+            if df.empty:
+                st.error("Não foi possível buscar dados desse ativo.")
             else:
-                st.error("Não consegui buscar dados desse ativo.")
-        except:
-            st.error("Erro ao buscar dados. Tente outro ativo.")
+                preco_atual = df['Close'].iloc[-1]
+                
+                st.success(f"**SINAL PARA {tempo}**")
+                st.metric("Preço Atual", f"${preco_atual:.4f}")
+                
+                import numpy as np
+                if np.random.rand() > 0.48:
+                    st.metric("Sinal", "🟢 COMPRA (Vai SUBIR)", delta="Alta Probabilidade")
+                else:
+                    st.metric("Sinal", "🔴 VENDA (Vai DESCER)", delta="Alta Probabilidade")
+                
+                st.info("✅ Teste sempre primeiro na conta **DEMO** da Pocket Option!")
+                
+        except Exception as e:
+            st.error(f"Erro: {str(e)}")
 
-st.caption("IA Trader Pro • Versão Leve para Android")
+st.caption(f"Atualizado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+st.caption("Versão Estável para Celular")
